@@ -2,6 +2,7 @@ package imgproxy
 
 import (
 	"encoding/hex"
+	"net/url"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -38,6 +39,23 @@ func Test_ImgproxyBuilder(t *testing.T) {
 			url, err := ip.Builder().Generate("my/image.jpg")
 			So(err, ShouldBeNil)
 			So(url, ShouldEqual, "http://localhost/6wIzqvuZtfHT1LL3J_z0/bXkvaW1hZ2UuanBn")
+		})
+
+		Convey("Returns the url as URL with the uri encoded and sign when Encode is true and key and salt are not empty", func() {
+			ip, err := NewImgproxy(Config{
+				BaseURL:       "http://localhost",
+				SignatureSize: 15,
+				Key:           hex.EncodeToString([]byte("key")),
+				Salt:          hex.EncodeToString([]byte("salt")),
+				EncodePath:    true,
+			})
+			So(err, ShouldBeNil)
+
+			result, err := ip.Builder().GenerateURL("my/image.jpg")
+			So(err, ShouldBeNil)
+			expected, _ := url.Parse("http://localhost/6wIzqvuZtfHT1LL3J_z0/bXkvaW1hZ2UuanBn")
+			So(result, ShouldHaveSameTypeAs, expected)
+			So(result, ShouldResemble, expected)
 		})
 
 		Convey("Returns the url without signature when key and salt are empty", func() {

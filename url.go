@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -53,6 +54,14 @@ func (i *ImgproxyURLData) Generate(uri string) (string, error) {
 	}
 
 	return i.cfg.BaseURL + signature + uriWithOptions, nil
+}
+
+func (i *ImgproxyURLData) GenerateURL(uri string) (*url.URL, error) {
+	surl, err := i.Generate(uri)
+	if err != nil {
+		return nil, err
+	}
+	return url.Parse(surl)
 }
 
 func getSignatureHash(key []byte, salt []byte, signatureSize int, payload string) (string, error) {
