@@ -24,24 +24,30 @@ func NewImgproxy(cfg Config) (*Imgproxy, error) {
 		cfg.BaseURL = cfg.BaseURL + "/"
 	}
 
-	if cfg.SignatureSize < 1 || cfg.SignatureSize > 32 {
-		return nil, errors.WithStack(ErrInvalidSignature)
-	}
+	if cfg.Key != "" && cfg.Salt != "" {
+		if cfg.SignatureSize < 1 || cfg.SignatureSize > 32 {
+			return nil, errors.WithStack(ErrInvalidSignature)
+		}
 
-	key, err := hex.DecodeString(cfg.Key)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
+		key, err := hex.DecodeString(cfg.Key)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
 
-	salt, err := hex.DecodeString(cfg.Salt)
-	if err != nil {
-		return nil, errors.WithStack(err)
+		salt, err := hex.DecodeString(cfg.Salt)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		return &Imgproxy{
+			cfg:  cfg,
+			salt: salt,
+			key:  key,
+		}, nil
 	}
 
 	return &Imgproxy{
-		cfg:  cfg,
-		salt: salt,
-		key:  key,
+		cfg: cfg,
 	}, nil
 }
 

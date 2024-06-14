@@ -23,6 +23,17 @@ func Test_NewImgproxy(t *testing.T) {
 	})
 }
 
+func Test_NewImgproxyWithoutKey(t *testing.T) {
+	Convey("NewImgproxy()", t, func() {
+		Convey("Retunrs error if the signature is not valid", func() {
+			_, err := NewImgproxy(Config{
+				BaseURL: "http://localhost",
+			})
+			So(err, ShouldBeNil)
+		})
+	})
+}
+
 func Test_ImgproxyBuilder(t *testing.T) {
 	Convey("Imgproxy.Builder()", t, func() {
 		Convey("Returns the url with the uri encoded and sign when Encode is true and key and salt are not empty", func() {
@@ -53,6 +64,22 @@ func Test_ImgproxyBuilder(t *testing.T) {
 			url, err := ip.Builder().Generate("my/image.jpg")
 			So(err, ShouldBeNil)
 			So(url, ShouldEqual, "http://localhost/insecure/plain/my/image.jpg")
+		})
+
+		Convey("Returns the url with custom insecure signature when key and salt are empty", func() {
+			ip, err := NewImgproxy(Config{
+				BaseURL:           "http://localhost",
+				SignatureSize:     15,
+				Key:               "",
+				Salt:              "",
+				EncodePath:        false,
+				InsecureSignature: "XXX",
+			})
+			So(err, ShouldBeNil)
+
+			url, err := ip.Builder().Generate("my/image.jpg")
+			So(err, ShouldBeNil)
+			So(url, ShouldEqual, "http://localhost/XXX/plain/my/image.jpg")
 		})
 
 		Convey("With key salt and no encoded", func() {

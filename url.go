@@ -44,6 +44,11 @@ func (i *ImgproxyURLData) Generate(uri string) (string, error) {
 	uriWithOptions := options + uri
 
 	if len(i.salt) == 0 && len(i.key) == 0 {
+		insecureSignature := i.cfg.InsecureSignature
+		if insecureSignature == "" {
+			insecureSignature = "insecure"
+		}
+
 		return i.cfg.BaseURL + insecureSignature + uriWithOptions, nil
 	}
 
