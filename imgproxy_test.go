@@ -142,13 +142,24 @@ func Test_ImgproxyBuilder(t *testing.T) {
 				})
 			})
 
-			Convey("Enlarge sets enlarge option", func() {
-				url, err := ip.Builder().
-					Enlarge(1).
-					Generate("my/image.jpg")
+			Convey("Enlarge", func() {
+				Convey("With true sets it to 1", func() {
+					url, err := ip.Builder().
+						Enlarge(true).
+						Generate("my/image.jpg")
 
-				So(err, ShouldBeNil)
-				So(url, ShouldEqual, "http://localhost/Kh3OA5md8aQEj5l9oc4t/el:1/plain/my/image.jpg")
+					So(err, ShouldBeNil)
+					So(url, ShouldEqual, "http://localhost/Kh3OA5md8aQEj5l9oc4t/el:1/plain/my/image.jpg")
+				})
+
+				Convey("With false sets it to 0", func() {
+					url, err := ip.Builder().
+						Enlarge(false).
+						Generate("my/image.jpg")
+
+					So(err, ShouldBeNil)
+					So(url, ShouldEqual, "http://localhost/P2bzObD8GValdJ8EuqzP/el:0/plain/my/image.jpg")
+				})
 			})
 
 			Convey("Gravity", func() {

@@ -141,8 +141,8 @@ func (i *ImgproxyURLData) DPR(dpr float64) *ImgproxyURLData {
 }
 
 // Enlarge enlarges the image.
-func (i *ImgproxyURLData) Enlarge(enlarge int) *ImgproxyURLData {
-	return i.SetOption("el", strconv.Itoa(enlarge))
+func (i *ImgproxyURLData) Enlarge(enlarge bool) *ImgproxyURLData {
+	return i.SetOption("el", boolAsNumberString(enlarge))
 
 }
 
