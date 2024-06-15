@@ -132,9 +132,9 @@ func (i *ImgproxyURLData) Height(height int) *ImgproxyURLData {
 }
 
 // DPR controls the output density of your image.
-func (i *ImgproxyURLData) DPR(dpr int) *ImgproxyURLData {
+func (i *ImgproxyURLData) DPR(dpr float64) *ImgproxyURLData {
 	if dpr > 0 {
-		return i.SetOption("dpr", strconv.Itoa(dpr))
+		return i.SetOption("dpr", formatFloat(dpr))
 	}
 
 	return i
@@ -316,21 +316,21 @@ const (
 
 // WatermarkOffset holds the watermark coordinates.
 type WatermarkOffset struct {
-	X int
-	Y int
+	X float64
+	Y float64
 }
 
 // Watermark places a watermark on the processed image.
-func (i *ImgproxyURLData) Watermark(opacity int, position WatermarkPosition, offset *WatermarkOffset, scale int) *ImgproxyURLData {
+func (i *ImgproxyURLData) Watermark(opacity float64, position WatermarkPosition, offset *WatermarkOffset, scale float64) *ImgproxyURLData {
 	var offsetStr string
 
 	if offset != nil {
-		offsetStr = fmt.Sprintf(":%d:%d", offset.X, offset.Y)
+		offsetStr = fmt.Sprintf(":%s:%s", formatFloat(offset.X), formatFloat(offset.Y))
 	}
 
 	return i.SetOption("wm",
 		fmt.Sprintf(
-			"%d:%s%s:%d", opacity, position, offsetStr, scale,
+			"%s:%s%s:%s", formatFloat(opacity), position, offsetStr, formatFloat(scale),
 		),
 	)
 }

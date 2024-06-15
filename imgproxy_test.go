@@ -134,11 +134,11 @@ func Test_ImgproxyBuilder(t *testing.T) {
 
 				Convey("Higher than zero sets the option", func() {
 					url, err := ip.Builder().
-						DPR(10).
+						DPR(2.123).
 						Generate("my/image.jpg")
 
 					So(err, ShouldBeNil)
-					So(url, ShouldEqual, "http://localhost/H3-NasL_V_EQt3f84ocr/dpr:10/plain/my/image.jpg")
+					So(url, ShouldEqual, "http://localhost/8egu927RcXe616QvIBRA/dpr:2.123/plain/my/image.jpg")
 				})
 			})
 
@@ -242,18 +242,18 @@ func Test_ImgproxyBuilder(t *testing.T) {
 				Convey("With offset sets the option", func() {
 					url, err := ip.Builder().
 						Watermark(
-							1,
+							0.123,
 							WatermarkPositionWest,
 							&WatermarkOffset{
-								X: 1,
-								Y: 2,
+								X: 1.2,
+								Y: 2.4,
 							},
 							3,
 						).
 						Generate("my/image.jpg")
 
 					So(err, ShouldBeNil)
-					So(url, ShouldEqual, "http://localhost/2DBmLVDEF_HSDTlksj1c/wm:1:we:1:2:3/plain/my/image.jpg")
+					So(url, ShouldEqual, "http://localhost/v-DxulpAqvDlwH6y0C2s/wm:0.123:we:1.2:2.4:3/plain/my/image.jpg")
 				})
 
 				Convey("Without offset sets the option", func() {
