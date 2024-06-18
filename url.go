@@ -20,6 +20,97 @@ type ImgproxyURLData struct {
 
 const insecureSignature = "insecure"
 
+var allOptions = []struct {
+	long  string
+	short string
+}{
+	{"resize", "rs"},
+	{"size", "s"},
+	{"resizing_type", "rt"},
+	{"resizing_algorithm", "ra"},
+	{"width", "w"},
+	{"height", "h"},
+	{"min-width", "mw"},
+	{"min-height", "mh"},
+	{"zoom", "z"},
+	{"dpr", "dpr"},
+	{"enlarge", "el"},
+	{"extend", "ex"},
+	{"extend_aspect_ratio", "ea"},
+	{"gravity", "g"},
+	{"crop", "c"},
+	{"trim", "t"},
+	{"padding", "p"},
+	{"auto_rotate", "ar"},
+	{"rotate", "ro"},
+	{"background", "bg"},
+	{"background_alpha", "ba"},
+	{"adjust", "ad"},
+	{"brightness", "br"},
+	{"contrast", "co"},
+	{"saturation", "sa"},
+	{"blur", "bl"},
+	{"sharpen", "sh"},
+	{"pixelate", "px"},
+	{"unsharp_masking", "um"},
+	{"blur_detections", "bd"},
+	{"draw_detections", "dd"},
+	{"gradient", "gr"},
+	{"watermark", "wm"},
+	{"watermark_url", "wu"},
+	{"watermark_text", "wt"},
+	{"watermark_size", "ws"},
+	{"watermark_rotate", "wr"},
+	{"watermark_shadow", "wsh"},
+	{"style", "st"},
+	{"strip_metadata", "sm"},
+	{"keep_copyright", "kc"},
+	{"dpi", "dpi"},
+	{"strip_color_profile", "scp"},
+	{"enforce_thumbnail", "et"},
+	{"quality", "q"},
+	{"format_quality", "fq"},
+	{"autoquality", "aq"},
+	{"max_bytes", "mb"},
+	{"jpeg_options", "jpeg_options"},
+	{"png_options", "png_options"},
+	{"webp_options", "webp_options"},
+	{"format", "f"},
+	{"page", "page"},
+	{"pages", "pages"},
+	{"disable_animation", "da"},
+	{"video_thumbnail_second", "vts"},
+	{"video_thumbnail_keyframes", "vtk"},
+	{"video_thumbnail_tile", "vtt"},
+	{"fallback_image_url", "fi"},
+	{"skip_processing", "sp"},
+	{"raw", "raw"},
+	{"cachebuster", "cb"},
+	{"expires", "exp"},
+	{"filename", "fn"},
+	{"return_attachment", "ra"},
+	{"preset", "pr"},
+	{"hashsum", "hs"},
+	{"max_src_resolution", "msr"},
+	{"max_src_file_size", "msfs"},
+	{"max_animation_frames", "maf"},
+	{"max_animation_frame_resolution", "mafr"},
+}
+
+// processOptionMap processes the allOptions and updates the options string and opts map.
+func processOptionMap(opts []struct {
+	long  string
+	short string
+}) map[string]string {
+	var optionMap = map[string]string{}
+
+	for _, o := range opts {
+		optionMap[o.long] = o.short
+	}
+
+	return optionMap
+}
+
 // Generate generates the imgproxy URL.
 func (i *ImgproxyURLData) Generate(uri string) (string, error) {
 	if i.cfg.EncodePath {
@@ -28,17 +119,41 @@ func (i *ImgproxyURLData) Generate(uri string) (string, error) {
 		uri = "plain/" + uri
 	}
 
-	keys := make([]string, len(i.Options))
+	opts := i.Options
+
+	optionMap := processOptionMap(allOptions)
+
+	options := "/"
+	for _, o := range allOptions {
+		option := opts[o.long]
+		if len(option) == 0 {
+			option = opts[o.short]
+		}
+		if len(option) == 0 {
+			continue
+		}
+		options += o.short + ":" + option + "/"
+		delete(opts, o.short)
+		delete(opts, o.long)
+	}
+
+	// Append remaining options in alphabetical order
+	keys := make([]string, len(opts))
 	j := 0
-	for key := range i.Options {
+	for key := range opts {
 		keys[j] = key
 		j++
 	}
 	sort.Strings(keys)
 
-	options := "/"
 	for _, key := range keys {
-		options += key + ":" + i.Options[key] + "/"
+		short := optionMap[key]
+
+		if len(short) > 0 {
+			key = short
+		}
+
+		options += key + ":" + opts[key] + "/"
 	}
 
 	uriWithOptions := options + uri
@@ -94,7 +209,7 @@ const (
 
 // Resize resizes the image.
 func (i *ImgproxyURLData) Resize(resizingType ResizingType, width int, height int, enlarge bool, extend bool) *ImgproxyURLData {
-	return i.SetOption("rs", fmt.Sprintf(
+	return i.SetOption("resize", fmt.Sprintf(
 		"%s:%d:%d:%s:%s",
 		resizingType,
 		width, height,
@@ -105,7 +220,7 @@ func (i *ImgproxyURLData) Resize(resizingType ResizingType, width int, height in
 
 // Size sets size option.
 func (i *ImgproxyURLData) Size(width int, height int, enlarge bool) *ImgproxyURLData {
-	return i.SetOption("s", fmt.Sprintf(
+	return i.SetOption("size", fmt.Sprintf(
 		"%d:%d:%s",
 		width, height,
 		boolAsNumberString(enlarge),
@@ -114,21 +229,21 @@ func (i *ImgproxyURLData) Size(width int, height int, enlarge bool) *ImgproxyURL
 
 // ResizingType sets the resizing type.
 func (i *ImgproxyURLData) ResizingType(resizingType ResizingType) *ImgproxyURLData {
-	return i.SetOption("rs", string(resizingType))
+	return i.SetOption("resizing_type", string(resizingType))
 }
 
 // Width defines the width of the resulting image.
 // When set to 0, imgproxy will calculate width using the defined height and source aspect ratio.
 // When set to 0 and resizing type is force, imgproxy will keep the original width.
 func (i *ImgproxyURLData) Width(width int) *ImgproxyURLData {
-	return i.SetOption("w", strconv.Itoa(width))
+	return i.SetOption("width", strconv.Itoa(width))
 }
 
 // Height defines the height of the resulting image.
 // When set to 0, imgproxy will calculate resulting height using the defined width and source aspect ratio.
 // When set to 0 and resizing type is force, imgproxy will keep the original height.
 func (i *ImgproxyURLData) Height(height int) *ImgproxyURLData {
-	return i.SetOption("h", strconv.Itoa(height))
+	return i.SetOption("height", strconv.Itoa(height))
 }
 
 // DPR controls the output density of your image.
@@ -142,7 +257,7 @@ func (i *ImgproxyURLData) DPR(dpr int) *ImgproxyURLData {
 
 // Enlarge enlarges the image.
 func (i *ImgproxyURLData) Enlarge(enlarge int) *ImgproxyURLData {
-	return i.SetOption("el", strconv.Itoa(enlarge))
+	return i.SetOption("enlarge", strconv.Itoa(enlarge))
 
 }
 
@@ -161,7 +276,7 @@ type OffsetGravity struct {
 
 // SetGravityOption sets the gravity option.
 func (o OffsetGravity) SetGravityOption(i *ImgproxyURLData) *ImgproxyURLData {
-	return i.SetOption("g", o.GetStringOption())
+	return i.SetOption("gravity", o.GetStringOption())
 }
 
 // GetStringOption gets the gravity offset value as string.
@@ -177,7 +292,7 @@ type FocusPoint struct {
 
 // SetGravityOption sets gravity option.
 func (f FocusPoint) SetGravityOption(i *ImgproxyURLData) *ImgproxyURLData {
-	return i.SetOption("g", f.GetStringOption())
+	return i.SetOption("gravity", f.GetStringOption())
 }
 
 // GetStringOption gets the focus point value as string.
@@ -229,7 +344,7 @@ func (i *ImgproxyURLData) Gravity(g GravitySetter) *ImgproxyURLData {
 
 // Quality redefines quality of the resulting image, as a percentage.
 func (i *ImgproxyURLData) Quality(quality int) *ImgproxyURLData {
-	return i.SetOption("q", strconv.Itoa(quality))
+	return i.SetOption("quality", strconv.Itoa(quality))
 }
 
 // HexColor holds an hexadecimal format color.
@@ -237,7 +352,7 @@ type HexColor string
 
 // SetBgOption sets the background option.
 func (h HexColor) SetBgOption(i *ImgproxyURLData) *ImgproxyURLData {
-	return i.SetOption("bg", string(h))
+	return i.SetOption("background", string(h))
 }
 
 // RGBColor holds an RGB color.
@@ -249,7 +364,7 @@ type RGBColor struct {
 
 // SetBgOption sets the background option.
 func (rgb RGBColor) SetBgOption(i *ImgproxyURLData) *ImgproxyURLData {
-	return i.SetOption("bg", fmt.Sprintf("%d:%d:%d", rgb.R, rgb.G, rgb.B))
+	return i.SetOption("background", fmt.Sprintf("%d:%d:%d", rgb.R, rgb.G, rgb.B))
 }
 
 // BackgroundSetter interface to set the background option.
@@ -268,13 +383,13 @@ func (i *ImgproxyURLData) Background(bg BackgroundSetter) *ImgproxyURLData {
 // Blur applies a gaussian blur filter to the resulting image.
 // The value of sigma defines the size of the mask imgproxy will use.
 func (i *ImgproxyURLData) Blur(sigma int) *ImgproxyURLData {
-	return i.SetOption("bl", strconv.Itoa(sigma))
+	return i.SetOption("blur", strconv.Itoa(sigma))
 }
 
 // Sharpen applies the sharpen filter to the resulting image.
 // The value of sigma defines the size of the mask imgproxy will use.
 func (i *ImgproxyURLData) Sharpen(sigma int) *ImgproxyURLData {
-	return i.SetOption("sh", strconv.Itoa(sigma))
+	return i.SetOption("sharpen", strconv.Itoa(sigma))
 }
 
 // WatermarkPosition holds a watermark position option.
@@ -328,7 +443,7 @@ func (i *ImgproxyURLData) Watermark(opacity int, position WatermarkPosition, off
 		offsetStr = fmt.Sprintf(":%d:%d", offset.X, offset.Y)
 	}
 
-	return i.SetOption("wm",
+	return i.SetOption("watermark",
 		fmt.Sprintf(
 			"%d:%s%s:%d", opacity, position, offsetStr, scale,
 		),
@@ -337,19 +452,19 @@ func (i *ImgproxyURLData) Watermark(opacity int, position WatermarkPosition, off
 
 // Preset defines a list of presets to be used by imgproxy.
 func (i *ImgproxyURLData) Preset(presets ...string) *ImgproxyURLData {
-	return i.SetOption("pr", strings.Join(presets, ":"))
+	return i.SetOption("preset", strings.Join(presets, ":"))
 }
 
 // CacheBuster doesn’t affect image processing but its changing allows for bypassing the CDN, proxy server and browser cache.
 // Useful when you have changed some things that are not reflected in the URL, like image quality settings, presets, or watermark data.
 // It’s highly recommended to prefer the cachebuster option over a URL query string because that option can be properly signed.
 func (i *ImgproxyURLData) CacheBuster(buster string) *ImgproxyURLData {
-	return i.SetOption("cb", buster)
+	return i.SetOption("cachebuster", buster)
 }
 
 // Format specifies the resulting image format. Alias for the extension part of the URL.
 func (i *ImgproxyURLData) Format(extension string) *ImgproxyURLData {
-	return i.SetOption("f", extension)
+	return i.SetOption("format", extension)
 }
 
 // Crop sets the crop option.
@@ -360,7 +475,7 @@ func (i *ImgproxyURLData) Crop(width int, height int, gravity GravitySetter) *Im
 		crop += ":" + gravity.GetStringOption()
 	}
 
-	return i.SetOption("c", crop)
+	return i.SetOption("crop", crop)
 }
 
 // SetOption sets an option on the URL.

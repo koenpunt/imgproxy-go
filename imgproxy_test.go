@@ -101,7 +101,7 @@ func Test_ImgproxyBuilder(t *testing.T) {
 					Generate("my/image.jpg")
 
 				So(err, ShouldBeNil)
-				So(url, ShouldEqual, "http://localhost/YohdbDjMgBhATlRO7Ifs/rs:fill/plain/my/image.jpg")
+				So(url, ShouldEqual, "http://localhost/7xBbA_IVAkCFtuWng6tp/rt:fill/plain/my/image.jpg")
 			})
 
 			Convey("Width sets width option", func() {
@@ -305,6 +305,43 @@ func Test_ImgproxyBuilder(t *testing.T) {
 
 				So(err, ShouldBeNil)
 				So(url, ShouldEqual, "http://localhost/00J_9T9UyVpOBQkQbodf/c:1:2:ce/plain/my/image.jpg")
+			})
+
+			Convey("Multiple options are added in opinionated order", func() {
+				url, err := ip.Builder().
+					ResizingType(ResizingTypeFill).
+					Width(123).
+					Height(456).
+					Enlarge(1).
+					DPR(2).
+					Generate("my/image.jpg")
+
+				So(err, ShouldBeNil)
+				So(url, ShouldEqual, "http://localhost/a02utOySZPJfJpenV45w/rt:fill/w:123/h:456/dpr:2/el:1/plain/my/image.jpg")
+			})
+
+			Convey("Custom options are added in alphabetical order", func() {
+				url, err := ip.Builder().
+					ResizingType(ResizingTypeFill).
+					Width(123).
+					Height(456).
+					Enlarge(1).
+					DPR(2).
+					SetOption("foo", "bar").
+					SetOption("bar", "baz").
+					Generate("my/image.jpg")
+
+				So(err, ShouldBeNil)
+				So(url, ShouldEqual, "http://localhost/5quWQtkWNZ1SQf9DWSFY/rt:fill/w:123/h:456/dpr:2/el:1/bar:baz/foo:bar/plain/my/image.jpg")
+			})
+
+			Convey("Long options are shortened", func() {
+				url, err := ip.Builder().
+					SetOption("watermark", "1:se:0:0").
+					Generate("my/image.jpg")
+
+				So(err, ShouldBeNil)
+				So(url, ShouldEqual, "http://localhost/ug0z5Cmtj1KGxp_PvsMC/wm:1:se:0:0/plain/my/image.jpg")
 			})
 		})
 	})
