@@ -114,7 +114,7 @@ func (i *ImgproxyURLData) Size(width int, height int, enlarge bool) *ImgproxyURL
 
 // ResizingType sets the resizing type.
 func (i *ImgproxyURLData) ResizingType(resizingType ResizingType) *ImgproxyURLData {
-	return i.SetOption("rs", string(resizingType))
+	return i.SetOption("rt", string(resizingType))
 }
 
 // Width defines the width of the resulting image.

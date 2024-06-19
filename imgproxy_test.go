@@ -101,7 +101,7 @@ func Test_ImgproxyBuilder(t *testing.T) {
 					Generate("my/image.jpg")
 
 				So(err, ShouldBeNil)
-				So(url, ShouldEqual, "http://localhost/YohdbDjMgBhATlRO7Ifs/rs:fill/plain/my/image.jpg")
+				So(url, ShouldEqual, "http://localhost/7xBbA_IVAkCFtuWng6tp/rt:fill/plain/my/image.jpg")
 			})
 
 			Convey("Width sets width option", func() {
